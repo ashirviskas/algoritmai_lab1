@@ -63,14 +63,23 @@ class Student:
 
 
 class HashTable:
-    def __init__(self, size):
+    def __init__(self, size, from_file = False, filename = "", space_for_name = 32):
         self.size = size
         self.table = [None for y in range(size)]
+        self.from_file = from_file
+        self.filename = filename
+        self.full = False
+        self.space_for_name = space_for_name
+        if from_file:
+            self.fill_with_zerooos()
 
     def __str__(self):
         string = ""
-        for student in self.table:
-            string = string  + student.name + "; "
+        if not self.from_file:
+            for student in self.table:
+                string = string + student.name + "; "
+        else:
+
         return string
 
 
@@ -89,25 +98,57 @@ class HashTable:
 
     def checkIfFull(self):
         full = True
-        for student in self.table:
-            if student is None:
-                full = False
+        if not self.from_file:
+            for student in self.table:
+                if student is None:
+                    return False
+        else:
+            with open(self.filename, "r+b", 0) as file:
+                data = file.read()
+                for i in range(0, self.space_for_name):
+                    if data[i*self.space_for_name:i*self.space_for_name+self.space_for_name+1] != ' '*self.space_for_name:
+                        return False
         return full
-    def QuadraticHashInsert(self, student):
 
+    def fill_with_zerooos(self):
+        file = open(self.filename, "wb")
+        for i in range(self.size):
+            zero = 0
+            namestring = " "*self.space_for_name
+            bytes = namestring.encode('utf-8')
+            file.write(bytes)
+            print(bytes)
+        file.close()
+
+    def QuadraticHashInsert(self, student, from_file = False):
         if (self.checkIfFull()):
             print("Tabley is fulley")
-            return
+            return False
         key = student.name
         bytes = str.encode(key)
         number = int.from_bytes(bytes, byteorder='big')
         hash = number % self.size
         j = 1
-        while self.table[hash] is not None and self.table[hash] != student:
-            hash = (hash + j * j) % self.size
-            j += 1
-        if self.table[hash] == None:
-            self.table[hash] = student
+        if not from_file:
+            while self.table[hash] is not None and self.table[hash] != student:
+                hash = (hash + j * j) % self.size
+                j += 1
+            if self.table[hash] == None:
+                self.table[hash] = student
+                return True
+        else:
+            with open(self.filename, "r+b", 0) as file:
+                data = file.read()
+                while data[hash*self.space_for_name:hash*self.space_for_name+self.space_for_name] != ' '*self.space_for_name:
+                    hash = (hash + j * j) % self.size
+                    j += 1
+                if data[hash*self.space_for_name:hash*self.space_for_name+self.space_for_name] == ' '*self.space_for_name:
+                    data[hash*self.space_for_name:hash*self.space_for_name+self.space_for_name] = student.name + ' '*(self.space_for_name - (student.name))
+                    file.seek(0)
+                    file.write(data)
+                    file.close()
+                    return True
+        return False
 
     def Remove(self, student):
         key = student.name
@@ -156,7 +197,7 @@ def populate_binary_file_list(filename, min, max, size):
         if (i != size-1):
             next_node = (i+1).to_bytes(4, sys.byteorder)
             file.write(next_node)
-            my_bytearray = bytearray(my_bytes + next_node) ### NEED REDOING! my_bytearray remove!
+            my_bytearray = bytearray(my_bytes + next_node)
         else:
             next_node = (2147483647).to_bytes(4, sys.byteorder)
             file.write(next_node)
@@ -238,6 +279,7 @@ def counting_sort_linked_file(filename): #need to do something with max value. P
             set_bytevalue_file(filename, i, node*2)
             node = struct.unpack("i", tuples[node * 2 + 1])[0]
 
+
 def counting_sort_array(arrray, k):
     counter = [0] * (k + 1)
     for i in arrray:
@@ -251,11 +293,20 @@ def counting_sort_array(arrray, k):
 
 
 def counting_sort_array_file(filename):
-    file = open(filename)
-    k = 0
-
-
-
+    k = 1024
+    counter = [0] * (k + 1)
+    file = open(filename, "rb", 0)
+    data = file.read()
+    file.close()
+    tuples = [data[i:i + 4] for i in range(0, len(data), 4)]
+    for i in tuples:
+        counter[struct.unpack("i", i)[0]] += 1
+    ndx = 0
+    for i in range(len(counter)):
+        while 0 < counter[i]:
+            set_bytevalue_file(filename, i, ndx)
+            ndx += 1
+            counter[i] -= 1
 
 
 def selection_sort_linked(aList):  # Selection Sort
@@ -325,7 +376,15 @@ def populate_array(array, min, max, n):
         array.append(random.randrange(min, max, 1))
 
 
-def do_in_memory(sizes):
+def do_all(sizes):
+    CSLLF = []
+    CSLL = []
+    CSAF = []
+    CSA = []
+    SSLLF = []
+    SSLL = []
+    SSAF = []
+    SSA = []
     for size in sizes:
         L = LinkedList()
         populate_list(L, 0, 10000, size)
@@ -376,10 +435,11 @@ sizes = [5]
 #populate_binary_file_array("arr_data", 0, 1024, 5)
 #swap_in_file_array("arr_data", 1, 2)
 #selection_sort_array_file("arr_data")
-populate_binary_file_list("list_data", 0, 1024, 5)
-counting_sort_linked_file("list_data")
+#populate_binary_file_list("list_data", 0, 1024, 5)
+#counting_sort_linked_file("list_data")
 #selection_sort_linked_file("list_data")
-
+hashtable = HashTable(5, True, "hashfile")
+hashtable.fill_with_zerooos()
 #populate_binary_file_list("list_data", 0, 1024, 5)
 # do_in_memory(sizes)
 """L = LinkedList()
