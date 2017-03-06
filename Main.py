@@ -186,13 +186,15 @@ def populate_binary_file_list(filename, min, max, size):
     for i in range(size):
         rndint = random.randint(min, max)
         my_bytes = rndint.to_bytes(4, sys.byteorder)
+        file.write(my_bytes)
         if (i != size-1):
-            next_node = (i + 1).to_bytes(4, sys.byteorder)
+            next_node = (i+1).to_bytes(4, sys.byteorder)
+            file.write(next_node)
             my_bytearray = bytearray(my_bytes + next_node) ### NEED REDOING! my_bytearray remove!
         else:
-            next_node = (0).to_bytes(4, sys.byteorder)
-            my_bytearray = bytearray(my_bytes + next_node)
-        file.write(my_bytearray)
+            next_node = (2147483647).to_bytes(4, sys.byteorder)
+            file.write(next_node)
+        #file.write(my_bytearray)
         print(rndint)
     file.close()
 
@@ -236,6 +238,22 @@ def selection_sort_linked(aList):  # Selection Sort
         node_min.value = temp.value
         node0 = node0.next
 
+def selection_sort_linked_file(filename):  # Selection Sort
+    node0 = 0
+    while (node0 < 2147483647):
+        node_min = node0
+        node1 = node0
+        while (node1 < 2147483647):
+            file = open(filename, "rb", 0)
+            data = file.read()
+            file.close()
+            tuples = [data[i:i + 4] for i in range(0, len(data), 4)]
+            if struct.unpack("i", tuples[node_min*2])[0] > struct.unpack("i", tuples[node1*2])[0]:
+                node_min = node1
+            node1 = struct.unpack("i", tuples[node1*2+1])[0]
+        swap_in_file_array(filename, node0*2, node_min*2)
+        node0 = struct.unpack("i", tuples[node0 * 2 + 1])[0]
+
 
 def selection_sort_array(array):
     for fillslot in range(len(array) - 1, 0, -1):
@@ -257,10 +275,6 @@ def selection_sort_array_file(filename):
             data = file.read()
             file.close()
             tuples = [data[i:i + 4] for i in range(0, len(data), 4)]
-            if location == 1:
-                for i in range(0, (len(tuples)), 1):
-                    print(struct.unpack("i", tuples[i])[0])
-                print("        ")
             if struct.unpack("i", tuples[location])[0] > struct.unpack("i", tuples[positionOfMax])[0]:
                 positionOfMax = location
         swap_in_file_array(filename,fillslot,positionOfMax)
@@ -325,9 +339,12 @@ def do_in_memory(sizes):
 sizes = [10, 100, 200, 400, 800, 1600, 10000]
 sizes = [5]
 #do_in_memory(sizes)
-populate_binary_file_array("arr_data", 0, 1024, 5)
+#populate_binary_file_array("arr_data", 0, 1024, 5)
 #swap_in_file_array("arr_data", 1, 2)
-selection_sort_array_file("arr_data")
+#selection_sort_array_file("arr_data")
+populate_binary_file_list("list_data", 0, 1024, 5)
+selection_sort_linked_file("list_data")
+
 #populate_binary_file_list("list_data", 0, 1024, 5)
 # do_in_memory(sizes)
 """L = LinkedList()
