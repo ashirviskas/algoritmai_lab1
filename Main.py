@@ -2,6 +2,7 @@ import random
 import time
 import sys
 import os
+import matplotlib.pyplot as plt
 import fileinput
 import struct
 class Node:
@@ -119,7 +120,7 @@ class HashTable:
             namestring = " "*self.space_for_name
             bytes = namestring.encode('utf-8')
             file.write(bytes)
-            print(bytes)
+            #print(bytes)
         file.close()
 
     def QuadraticHashInsert(self, student):
@@ -189,7 +190,7 @@ def populate_binary_file_array(filename, min, max, size):
         my_bytes = rndint.to_bytes(4, sys.byteorder)
         my_bytearray = bytearray(my_bytes)
         file.write(my_bytes)
-        print(rndint)
+        #print(rndint)
     file.close()
 
 
@@ -207,7 +208,7 @@ def populate_binary_file_list(filename, min, max, size):
             next_node = (2147483647).to_bytes(4, sys.byteorder)
             file.write(next_node)
         #file.write(my_bytearray)
-        print(rndint)
+        #print(rndint)
     file.close()
 
 
@@ -263,7 +264,7 @@ def counting_sort_linked(aList, k): #Counting Sort, k is max value
 
 
 def counting_sort_linked_file(filename): #need to do something with max value. Probalby. Maybe not
-    counter = [0] * (1024 + 1)
+    counter = [0] * (10000 + 1)
     node = 0
     if node < 2147483647:
         file = open(filename, "rb", 0)
@@ -298,7 +299,7 @@ def counting_sort_array(arrray, k):
 
 
 def counting_sort_array_file(filename):
-    k = 1024
+    k = 10000
     counter = [0] * (k + 1)
     file = open(filename, "rb", 0)
     data = file.read()
@@ -390,6 +391,8 @@ def do_all(sizes):
     SSLL = []
     SSAF = []
     SSA = []
+    HTB = 0
+    HTBF = 0
     for size in sizes:
         L = LinkedList()
         populate_list(L, 0, 10000, size)
@@ -397,6 +400,8 @@ def do_all(sizes):
         start_time = time.time()
         counting_sort_linked(L, 10000)
         #print("Sorted Linked List:",L)
+        elapsed = time.time() - start_time
+        CSLL.append(elapsed)
         print("Time elapsed: ",time.time() - start_time)
         L.clear()
     for size in sizes:
@@ -407,6 +412,8 @@ def do_all(sizes):
         start_time = time.time()
         counting_sort_array(Array, 10000)
         #print(Array)
+        elapsed = time.time() - start_time
+        CSA.append(elapsed)
         print("Time elapsed: ",time.time() - start_time)
 
     for size in sizes:
@@ -415,7 +422,8 @@ def do_all(sizes):
         start_time = time.time()
         selection_sort_linked(L)
         #print("Sorted Linked List:",L)
-
+        elapsed = time.time() - start_time
+        SSLL.append(elapsed)
         print("Time elapsed: ",time.time() - start_time)
         L.clear()
 
@@ -425,18 +433,80 @@ def do_all(sizes):
         print("Sorting Array with selection sort, size: ", '{:>10}'.format(size))
         start_time = time.time()
         selection_sort_array(Array)
-        print("Time elapsed: ",time.time() - start_time)
+        elapsed = time.time() - start_time
+        SSA.append(elapsed)
+        print("Time elapsed: ", time.time() - start_time)
+    #FILES STARTIN #
+    for size in sizes:
+        print("FILE Sorting Array with selection sort, size: ", '{:>10}'.format(size))
+        populate_binary_file_array("arr_data", 0, 10000, size)
+        start_time = time.time()
+        selection_sort_array_file("arr_data")
+        elapsed = time.time() - start_time
+        SSAF.append(elapsed)
+        print("Time elapsed: ", time.time() - start_time)
+    for size in sizes:
+        print("FILE Sorting Linked with selection sort, size: ", '{:>10}'.format(size))
+        populate_binary_file_list("linked_data", 0, 10000, size)
+        start_time = time.time()
+        selection_sort_linked_file("linked_data")
+        elapsed = time.time() - start_time
+        SSLLF.append(elapsed)
+        print("Time elapsed: ", time.time() - start_time)
+    for size in sizes:
+        print("FILE Sorting Array with counting sort, size: ", '{:>10}'.format(size))
+        populate_binary_file_array("arr_data", 0, 10000, size)
+        start_time = time.time()
+        counting_sort_array_file("arr_data")
+        elapsed = time.time() - start_time
+        CSAF.append(elapsed)
+        print("Time elapsed: ", time.time() - start_time)
+    for size in sizes:
+        print("FILE Sorting Linked with counting sort, size: ", '{:>10}'.format(size))
+        populate_binary_file_list("linked_data", 0, 10000, size)
+        start_time = time.time()
+        counting_sort_linked_file("linked_data")
+        elapsed = time.time() - start_time
+        CSLLF.append(elapsed)
+        print("Time elapsed: ", time.time() - start_time)
+
+    start_time = time.time()
     hashtable = HashTable(5)
     hashtable.QuadraticHashInsert(Student("Matas Minelga"))
     hashtable.QuadraticHashInsert(Student("Rokas"))
     hashtable.QuadraticHashInsert(Student("Paulius"))
     hashtable.QuadraticHashInsert(Student("Matas Minelga"))
     hashtable.QuadraticHashInsert(Student("Simas"))
-    print(hashtable)
+    elapsed = time.time() - start_time
+    HTB = elapsed
 
-sizes = [10, 100, 200, 400, 800, 1600, 10000]
-sizes = [5]
-#do_in_memory(sizes)
+    start_time = time.time()
+    hashtable = HashTable(5, True, "hashtabley")
+    hashtable.QuadraticHashInsert(Student("Matas Minelga"))
+    hashtable.QuadraticHashInsert(Student("Rokas"))
+    hashtable.QuadraticHashInsert(Student("Paulius"))
+    hashtable.QuadraticHashInsert(Student("Matas Minelga"))
+    hashtable.QuadraticHashInsert(Student("Simas"))
+    elapsed = time.time() - start_time
+    HTBF = elapsed
+    #print(hashtable)
+    plt.subplot(211)
+    plt.plot( CSLLF, label = "CSLLF")
+    plt.plot( CSLL, label = "CSLL")
+    plt.plot( CSAF, label = "CSAF")
+    plt.plot( CSA, label = "CSA")
+    plt.plot( SSLLF, label = "SSLLF")
+    plt.plot( SSLL, label = "SSLL")
+    plt.plot( SSAF, label = "SSAF")
+    plt.plot( SSA, label = "SSA")
+    #plt.plot( CSLLF, CSLL, CSAF, CSA, SSLLF, SSLL, SSAF, SSA)
+    #plt.axis(sizes)
+    plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+
+    plt.show()
+
+sizes = [10, 100, 200]
+do_all(sizes)
 #populate_binary_file_array("arr_data", 0, 1024, 5)
 #swap_in_file_array("arr_data", 1, 2)
 #selection_sort_array_file("arr_data")
@@ -486,10 +556,3 @@ start_time = time.time()
 selection_sort_array(Array)
 #print(Array)
 print("Time elapsed: ",time.time() - start_time)"""
-hashtable = HashTable(5, True, "hashfile")
-hashtable.QuadraticHashInsert(Student("Matas Minelga"))
-hashtable.QuadraticHashInsert(Student("Rokas"))
-hashtable.QuadraticHashInsert(Student("Paulius"))
-hashtable.QuadraticHashInsert(Student("Matas Minelga"))
-hashtable.QuadraticHashInsert(Student("Simas"))
-print(hashtable)
