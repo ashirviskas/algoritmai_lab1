@@ -1,6 +1,8 @@
 import random
 import time
 import sys
+import fileinput
+import struct
 class Node:
     def __init__(self, value = None, next = None):
         self.value = value
@@ -160,7 +162,8 @@ def counting_sort_file(filename):
     file = open(filename)
     k = 0
 
-def populate_binary_file(filename, min, max, size):
+
+def populate_binary_file_array(filename, min, max, size):
     file = open(filename,'wb')
     for i in range(size):
         rndint = random.randint(min,max)
@@ -169,6 +172,44 @@ def populate_binary_file(filename, min, max, size):
         file.write(my_bytearray)
         print(rndint)
     file.close()
+
+
+def populate_binary_file_list(filename, min, max, size):
+    file = open(filename, 'wb')
+    for i in range(size):
+        rndint = random.randint(min, max)
+        my_bytes = rndint.to_bytes(4, sys.byteorder)
+        if (i != size-1):
+            next_node = (i + 1).to_bytes(4, sys.byteorder)
+            my_bytearray = bytearray(my_bytes + next_node)
+        else:
+            next_node = (0).to_bytes(4, sys.byteorder)
+            my_bytearray = bytearray(my_bytes + next_node)
+        file.write(my_bytearray)
+        print(rndint)
+    file.close()
+
+
+def swap_in_file_array(filename, a_ind, b_ind):
+    with open(filename, "r+b") as file:
+        data = file.read()
+        tuples = [data[i:i+4] for i in range(0, len(data), 4)]
+        a = []
+        b = []
+        for i in range(0, (len(tuples))):
+            if i == a_ind:
+                a = tuples[i]
+                # print(struct.unpack("i", tupples[i])[0])
+            elif i == b_ind:
+                b = tuples[i]
+        tuples[b_ind] = a
+        tuples[a_ind] = b
+        data = b''.join(tuples)
+        file.seek(0)
+        file.write(data)
+        file.close()
+
+
 def selection_sort_linked(aList):  # Selection Sort
     node0 = aList.first
     while (node0 != None):
@@ -203,6 +244,7 @@ def populate_list(aList, min, max, n):
 def populate_array(array, min, max, n):
     for i in range(n):
         array.append(random.randrange(min, max, 1))
+
 
 def do_in_memory(sizes):
     for size in sizes:
@@ -250,8 +292,10 @@ def do_in_memory(sizes):
     print(hashtable)
 
 sizes = [10, 100, 200, 400, 800, 1600, 10000]
-populate_binary_file("bin_data", 0, 1024, 5)
+populate_binary_file_array("arr_data", 0, 1024, 5)
+#populate_binary_file_list("list_data", 0, 1024, 5)
 # do_in_memory(sizes)
+swap_in_file_array("arr_data", 1, 2)
 """L = LinkedList()
 minimum=int(input('Įveskite minimalų skaičių:'))
 maximum=int(input('Įveskite maksimalų skaičių:'))
