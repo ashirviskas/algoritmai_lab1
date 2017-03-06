@@ -197,8 +197,55 @@ def populate_array(array, min, max, n):
     for i in range(n):
         array.append(random.randrange(min, max, 1))
 
+def do_in_memory(sizes):
+    for size in sizes:
+        L = LinkedList()
+        populate_list(L, 0, 10000, size)
+        print("Sorting Linked List with counting sort, size: ", '{:>10}'.format(size))
+        start_time = time.time()
+        counting_sort_linked(L, 10000)
+        #print("Sorted Linked List:",L)
+        print("Time elapsed: ",time.time() - start_time)
+        L.clear()
+    for size in sizes:
+        Array = []
+        populate_array(Array, 0, 10000, size)
+        #print(Array)
+        print("Sorting Array with counting sort, size: ", '{:>10}'.format(size))
+        start_time = time.time()
+        counting_sort_array(Array, 10000)
+        #print(Array)
+        print("Time elapsed: ",time.time() - start_time)
 
-L = LinkedList()
+    for size in sizes:
+        populate_list(L, 0, 10000, size)
+        print("Sorting Linked List with selection sort, size: ", '{:>10}'.format(size))
+        start_time = time.time()
+        selection_sort_linked(L)
+        #print("Sorted Linked List:",L)
+
+        print("Time elapsed: ",time.time() - start_time)
+        L.clear()
+
+    for size in sizes:
+        Array = []
+        populate_array(Array, 0, 10000, size)
+        print("Sorting Array with selection sort, size: ", '{:>10}'.format(size))
+        start_time = time.time()
+        selection_sort_array(Array)
+        print("Time elapsed: ",time.time() - start_time)
+    hashtable = HashTable(5)
+    hashtable.QuadraticHashInsert(Student("Matas Minelga"))
+    hashtable.QuadraticHashInsert(Student("Rokas"))
+    hashtable.QuadraticHashInsert(Student("Paulius"))
+    hashtable.QuadraticHashInsert(Student("Matas Minelga"))
+    hashtable.QuadraticHashInsert(Student("Simas"))
+    print(hashtable)
+
+sizes = [10, 100, 200, 400, 800, 1600, 10000]
+do_in_memory(sizes)
+
+"""L = LinkedList()
 minimum=int(input('Įveskite minimalų skaičių:'))
 maximum=int(input('Įveskite maksimalų skaičių:'))
 num=int(input('Įveskite elementų skaičių:'))
@@ -243,5 +290,4 @@ hashtable.QuadraticHashInsert(Student("Rokas"))
 hashtable.QuadraticHashInsert(Student("Paulius"))
 hashtable.QuadraticHashInsert(Student("Matas Minelga"))
 hashtable.QuadraticHashInsert(Student("Simas"))
-print(hashtable)
-
+print(hashtable)"""
