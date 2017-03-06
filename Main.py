@@ -136,40 +136,6 @@ def file_len(filename):
             pass
     return i + 1
 
-def counting_sort_linked(aList, k): #Counting Sort
-    counter = [0] * ( k + 1 )
-    node = aList.first
-    if node != None:
-        counter[node.value] += 1
-        while node.next != None:
-            node = node.next
-            counter[node.value] += 1
-    #for i in aList:
-      #counter[i] += 1
-    node = aList.first
-    for i in range( len( counter ) ):
-      for x in range (counter[i]):
-        node.value = i
-        node = node.next
-
-
-def counting_sort_array(arrray, k):
-    counter = [0] * (k + 1)
-    for i in arrray:
-        counter[i] += 1
-    ndx = 0
-    for i in range(len(counter)):
-        while 0 < counter[i]:
-            arrray[ndx] = i
-            ndx += 1
-            counter[i] -= 1
-
-
-def counting_sort_file(filename):
-    file = open(filename)
-    k = 0
-
-
 def populate_binary_file_array(filename, min, max, size):
     file = open(filename, 'wb', 0)
     for i in range(size):
@@ -221,6 +187,74 @@ def swap_in_file_array(filename, a_ind, b_ind, linked_list=False):
         file.write(data)
         file.close()
         return True
+
+def set_bytevalue_file(filename, value, index):
+    with open(filename, "r+b", 0) as file:
+        data = file.read()
+        tuples = [data[i:i + 4] for i in range(0, len(data), 4)]
+        tuples[index] = struct.pack("i", value)
+        data = b''.join(tuples)
+        file.seek(0)
+        file.write(data)
+        file.close()
+        return True
+
+def counting_sort_linked(aList, k): #Counting Sort, k is max value
+    counter = [0] * (k + 1)
+    node = aList.first
+    if node != None:
+        counter[node.value] += 1
+        while node.next != None:
+            node = node.next
+            counter[node.value] += 1
+    #for i in aList:
+      #counter[i] += 1
+    node = aList.first
+    for i in range( len( counter ) ):
+        for x in range (counter[i]):
+            node.value = i
+            node = node.next
+
+
+def counting_sort_linked_file(filename): #need to do something with max value. Probalby. Maybe not
+    counter = [0] * (1024 + 1)
+    node = 0
+    if node < 2147483647:
+        file = open(filename, "rb", 0)
+        data = file.read()
+        file.close()
+        tuples = [data[i:i + 4] for i in range(0, len(data), 4)]
+        counter[struct.unpack("i", tuples[node*2])[0]] += 1
+        while struct.unpack("i", tuples[node*2+1])[0] < 2147483647:
+            node = struct.unpack("i", tuples[node*2+1])[0]
+            counter[struct.unpack("i", tuples[node*2])[0]] += 1
+    file = open(filename, "rb", 0)
+    data = file.read()
+    file.close()
+    tuples = [data[i:i + 4] for i in range(0, len(data), 4)]
+    node = 0
+    for i in range(len(counter)):
+        for x in range (counter[i]):
+            set_bytevalue_file(filename, i, node*2)
+            node = struct.unpack("i", tuples[node * 2 + 1])[0]
+
+def counting_sort_array(arrray, k):
+    counter = [0] * (k + 1)
+    for i in arrray:
+        counter[i] += 1
+    ndx = 0
+    for i in range(len(counter)):
+        while 0 < counter[i]:
+            arrray[ndx] = i
+            ndx += 1
+            counter[i] -= 1
+
+
+def counting_sort_array_file(filename):
+    file = open(filename)
+    k = 0
+
+
 
 
 
@@ -343,7 +377,8 @@ sizes = [5]
 #swap_in_file_array("arr_data", 1, 2)
 #selection_sort_array_file("arr_data")
 populate_binary_file_list("list_data", 0, 1024, 5)
-selection_sort_linked_file("list_data")
+counting_sort_linked_file("list_data")
+#selection_sort_linked_file("list_data")
 
 #populate_binary_file_list("list_data", 0, 1024, 5)
 # do_in_memory(sizes)
