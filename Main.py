@@ -1,6 +1,7 @@
 import random
 import time
 import sys
+import os
 import fileinput
 import struct
 class Node:
@@ -123,6 +124,12 @@ class HashTable:
             self.table[hash] = None
             return True
 
+
+def file_size(filename):
+    st = os.stat(filename)
+    return st.st_size
+
+
 def file_len(filename):
     with open(filename) as f:
         for i, l in enumerate(f):
@@ -164,24 +171,24 @@ def counting_sort_file(filename):
 
 
 def populate_binary_file_array(filename, min, max, size):
-    file = open(filename,'wb')
+    file = open(filename, 'wb', 0)
     for i in range(size):
         rndint = random.randint(min,max)
         my_bytes = rndint.to_bytes(4, sys.byteorder)
         my_bytearray = bytearray(my_bytes)
-        file.write(my_bytearray)
+        file.write(my_bytes)
         print(rndint)
     file.close()
 
 
 def populate_binary_file_list(filename, min, max, size):
-    file = open(filename, 'wb')
+    file = open(filename, 'wb', 0)
     for i in range(size):
         rndint = random.randint(min, max)
         my_bytes = rndint.to_bytes(4, sys.byteorder)
         if (i != size-1):
             next_node = (i + 1).to_bytes(4, sys.byteorder)
-            my_bytearray = bytearray(my_bytes + next_node)
+            my_bytearray = bytearray(my_bytes + next_node) ### NEED REDOING! my_bytearray remove!
         else:
             next_node = (0).to_bytes(4, sys.byteorder)
             my_bytearray = bytearray(my_bytes + next_node)
@@ -190,8 +197,8 @@ def populate_binary_file_list(filename, min, max, size):
     file.close()
 
 
-def swap_in_file_array(filename, a_ind, b_ind, linked_list = False):
-    with open(filename, "r+b") as file:
+def swap_in_file_array(filename, a_ind, b_ind, linked_list=False):
+    with open(filename, "r+b", 0) as file:
         data = file.read()
         tuples = [data[i:i+4] for i in range(0, len(data), 4)]
         a = []
@@ -203,7 +210,7 @@ def swap_in_file_array(filename, a_ind, b_ind, linked_list = False):
             if i == a_ind:
                 a = tuples[i]
                 # print(struct.unpack("i", tupples[i])[0])
-            elif i == b_ind:
+            if i == b_ind:
                 b = tuples[i]
         tuples[b_ind] = a
         tuples[a_ind] = b
@@ -211,6 +218,7 @@ def swap_in_file_array(filename, a_ind, b_ind, linked_list = False):
         file.seek(0)
         file.write(data)
         file.close()
+        return True
 
 
 
@@ -238,6 +246,25 @@ def selection_sort_array(array):
         temp = array[fillslot]
         array[fillslot] = array[positionOfMax]
         array[positionOfMax] = temp
+
+def selection_sort_array_file(filename):
+    length = file_size(filename)/4
+    length = int(length)
+    for fillslot in range(length-1, 0, -1):
+        positionOfMax = 0
+        for location in range(1, fillslot + 1):
+            file = open(filename, "rb", 0)
+            data = file.read()
+            file.close()
+            tuples = [data[i:i + 4] for i in range(0, len(data), 4)]
+            if location == 1:
+                for i in range(0, (len(tuples)), 1):
+                    print(struct.unpack("i", tuples[i])[0])
+                print("        ")
+            if struct.unpack("i", tuples[location])[0] > struct.unpack("i", tuples[positionOfMax])[0]:
+                positionOfMax = location
+        swap_in_file_array(filename,fillslot,positionOfMax)
+
 
 
 def populate_list(aList, min, max, n):
@@ -296,10 +323,13 @@ def do_in_memory(sizes):
     print(hashtable)
 
 sizes = [10, 100, 200, 400, 800, 1600, 10000]
+sizes = [5]
+#do_in_memory(sizes)
 populate_binary_file_array("arr_data", 0, 1024, 5)
+#swap_in_file_array("arr_data", 1, 2)
+selection_sort_array_file("arr_data")
 #populate_binary_file_list("list_data", 0, 1024, 5)
 # do_in_memory(sizes)
-swap_in_file_array("arr_data", 1, 2)
 """L = LinkedList()
 minimum=int(input('Įveskite minimalų skaičių:'))
 maximum=int(input('Įveskite maksimalų skaičių:'))
