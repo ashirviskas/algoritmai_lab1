@@ -1,5 +1,6 @@
 import random
 import time
+import sys
 class Node:
     def __init__(self, value = None, next = None):
         self.value = value
@@ -147,7 +148,7 @@ def counting_sort_array(arrray, k):
     counter = [0] * (k + 1)
     for i in arrray:
         counter[i] += 1
-    ndx = 0;
+    ndx = 0
     for i in range(len(counter)):
         while 0 < counter[i]:
             arrray[ndx] = i
@@ -159,9 +160,15 @@ def counting_sort_file(filename):
     file = open(filename)
     k = 0
 
-
-
-
+def populate_binary_file(filename, min, max, size):
+    file = open(filename,'wb')
+    for i in range(size):
+        rndint = random.randint(min,max)
+        my_bytes = rndint.to_bytes(4, sys.byteorder)
+        my_bytearray = bytearray(my_bytes)
+        file.write(my_bytearray)
+        print(rndint)
+    file.close()
 def selection_sort_linked(aList):  # Selection Sort
     node0 = aList.first
     while (node0 != None):
@@ -243,8 +250,8 @@ def do_in_memory(sizes):
     print(hashtable)
 
 sizes = [10, 100, 200, 400, 800, 1600, 10000]
-do_in_memory(sizes)
-
+populate_binary_file("bin_data", 0, 1024, 5)
+# do_in_memory(sizes)
 """L = LinkedList()
 minimum=int(input('Įveskite minimalų skaičių:'))
 maximum=int(input('Įveskite maksimalų skaičių:'))
