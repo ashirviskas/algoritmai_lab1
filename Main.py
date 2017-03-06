@@ -145,8 +145,8 @@ class HashTable:
                     hash = (hash + j * j) % self.size
                     j += 1
                 if data[hash*self.space_for_name:hash*self.space_for_name+self.space_for_name] == (' '*self.space_for_name).encode():
-                    part_one = data[:self.space_for_name*(self.size-hash)]
-                    part_three = data[self.space_for_name*(hash):]
+                    part_one = data[:self.space_for_name*(hash)]
+                    part_three = data[self.space_for_name*(hash+1):]
                     part_two = (student.name + (' '*(self.space_for_name - len(student.name)))).encode()
                     data = part_one+part_two+part_three
                     file.seek(0)
