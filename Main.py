@@ -79,7 +79,9 @@ class HashTable:
             for student in self.table:
                 string = string + student.name + "; "
         else:
-
+            with open(self.filename, "r") as file:
+                string = file.read()
+                file.close()
         return string
 
 
@@ -120,7 +122,7 @@ class HashTable:
             print(bytes)
         file.close()
 
-    def QuadraticHashInsert(self, student, from_file = False):
+    def QuadraticHashInsert(self, student):
         if (self.checkIfFull()):
             print("Tabley is fulley")
             return False
@@ -129,7 +131,7 @@ class HashTable:
         number = int.from_bytes(bytes, byteorder='big')
         hash = number % self.size
         j = 1
-        if not from_file:
+        if not self.from_file:
             while self.table[hash] is not None and self.table[hash] != student:
                 hash = (hash + j * j) % self.size
                 j += 1
@@ -139,11 +141,14 @@ class HashTable:
         else:
             with open(self.filename, "r+b", 0) as file:
                 data = file.read()
-                while data[hash*self.space_for_name:hash*self.space_for_name+self.space_for_name] != ' '*self.space_for_name:
+                while data[hash*self.space_for_name:hash*self.space_for_name+self.space_for_name] != (' '*self.space_for_name).encode():
                     hash = (hash + j * j) % self.size
                     j += 1
-                if data[hash*self.space_for_name:hash*self.space_for_name+self.space_for_name] == ' '*self.space_for_name:
-                    data[hash*self.space_for_name:hash*self.space_for_name+self.space_for_name] = student.name + ' '*(self.space_for_name - (student.name))
+                if data[hash*self.space_for_name:hash*self.space_for_name+self.space_for_name] == (' '*self.space_for_name).encode():
+                    part_one = data[:self.space_for_name*(self.size-hash)]
+                    part_three = data[self.space_for_name*(hash):]
+                    part_two = (student.name + (' '*(self.space_for_name - len(student.name)))).encode()
+                    data = part_one+part_two+part_three
                     file.seek(0)
                     file.write(data)
                     file.close()
@@ -438,8 +443,8 @@ sizes = [5]
 #populate_binary_file_list("list_data", 0, 1024, 5)
 #counting_sort_linked_file("list_data")
 #selection_sort_linked_file("list_data")
-hashtable = HashTable(5, True, "hashfile")
-hashtable.fill_with_zerooos()
+#hashtable = HashTable(5, True, "hashfile")
+#hashtable.fill_with_zerooos()
 #populate_binary_file_list("list_data", 0, 1024, 5)
 # do_in_memory(sizes)
 """L = LinkedList()
@@ -480,11 +485,11 @@ print("Sorting Array with selection sort")
 start_time = time.time()
 selection_sort_array(Array)
 #print(Array)
-print("Time elapsed: ",time.time() - start_time)
-hashtable = HashTable(5)
+print("Time elapsed: ",time.time() - start_time)"""
+hashtable = HashTable(5, True, "hashfile")
 hashtable.QuadraticHashInsert(Student("Matas Minelga"))
 hashtable.QuadraticHashInsert(Student("Rokas"))
 hashtable.QuadraticHashInsert(Student("Paulius"))
 hashtable.QuadraticHashInsert(Student("Matas Minelga"))
 hashtable.QuadraticHashInsert(Student("Simas"))
-print(hashtable)"""
+print(hashtable)
