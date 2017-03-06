@@ -190,13 +190,16 @@ def populate_binary_file_list(filename, min, max, size):
     file.close()
 
 
-def swap_in_file_array(filename, a_ind, b_ind):
+def swap_in_file_array(filename, a_ind, b_ind, linked_list = False):
     with open(filename, "r+b") as file:
         data = file.read()
         tuples = [data[i:i+4] for i in range(0, len(data), 4)]
         a = []
         b = []
-        for i in range(0, (len(tuples))):
+        step = 1
+        if linked_list:
+            step = 2
+        for i in range(0, (len(tuples)), step):
             if i == a_ind:
                 a = tuples[i]
                 # print(struct.unpack("i", tupples[i])[0])
@@ -208,6 +211,7 @@ def swap_in_file_array(filename, a_ind, b_ind):
         file.seek(0)
         file.write(data)
         file.close()
+
 
 
 def selection_sort_linked(aList):  # Selection Sort
