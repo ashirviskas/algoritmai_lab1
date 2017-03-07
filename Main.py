@@ -3,8 +3,8 @@ import time
 import sys
 import os
 import matplotlib.pyplot as plt
-import fileinput
 import struct
+import string
 class Node:
     def __init__(self, value = None, next = None):
         self.value = value
@@ -90,27 +90,28 @@ class HashTable:
         bytes = str.encode(key)
         number = int.from_bytes(bytes, sys.byteorder)
         hash = number % self.size
-        j = 1
+        index = hash
+        j = 0
         if not self.from_file:
-            while (self.table[hash] is not None and self.table[hash] != key):
-                hash = (hash + j * j) % self.size
+            while (self.table[index] is not None and self.table[index].name != key):
+                index = (hash + j * j) % self.size
                 j += 1
-            if (self.table[hash] == None):
+            if (self.table[index] == None):
                 print("no such data")
             else:
-                return self.table[hash]
+                return self.table[index]
         else:
             with open(self.filename, "r+b", 0) as file:
                 data = file.read()
-                while data[hash * self.space_for_name:hash * self.space_for_name + self.space_for_name] != (
-                    ' ' * self.space_for_name).encode() and data[hash * self.space_for_name:hash * self.space_for_name + self.space_for_name] != (key + (' '*(self.space_for_name - len(key)))).encode():
-                    hash = (hash + j * j) % self.size
+                while data[index * self.space_for_name:index * self.space_for_name + self.space_for_name] != (
+                    ' ' * self.space_for_name).encode() and data[index * self.space_for_name:index * self.space_for_name + self.space_for_name] != (key + (' '*(self.space_for_name - len(key)))).encode():
+                    index = (hash + j * j) % self.size
                     j += 1
-                if data[hash * self.space_for_name:hash * self.space_for_name + self.space_for_name] == (
+                if data[index * self.space_for_name:index * self.space_for_name + self.space_for_name] == (
                     ' ' * self.space_for_name).encode():
                     print("no such data")
                 else:
-                    return data[hash * self.space_for_name:hash * self.space_for_name + self.space_for_name]
+                    return data[index * self.space_for_name:index * self.space_for_name + self.space_for_name]
     def checkIfFull(self):
         full = True
         if not self.from_file:
@@ -143,23 +144,24 @@ class HashTable:
         bytes = str.encode(key)
         number = int.from_bytes(bytes, byteorder='big')
         hash = number % self.size
-        j = 1
+        j = 0
+        index = hash
         if not self.from_file:
-            while self.table[hash] is not None and self.table[hash] != student:
-                hash = (hash + j * j) % self.size
+            while self.table[index] is not None and self.table[index] != student and j < self.size:
+                index = (hash + j * j) % self.size
                 j += 1
-            if self.table[hash] == None:
-                self.table[hash] = student
+            if self.table[index] == None:
+                self.table[index] = student
                 return True
         else:
             with open(self.filename, "r+b", 0) as file:
                 data = file.read()
-                while data[hash*self.space_for_name:hash*self.space_for_name+self.space_for_name] != (' '*self.space_for_name).encode():
-                    hash = (hash + j * j) % self.size
+                while data[index*self.space_for_name:index*self.space_for_name+self.space_for_name] != (' '*self.space_for_name).encode():
+                    index = (hash + j * j) % self.size
                     j += 1
-                if data[hash*self.space_for_name:hash*self.space_for_name+self.space_for_name] == (' '*self.space_for_name).encode():
-                    part_one = data[:self.space_for_name*(hash)]
-                    part_three = data[self.space_for_name*(hash+1):]
+                if data[index*self.space_for_name:index*self.space_for_name+self.space_for_name] == (' '*self.space_for_name).encode():
+                    part_one = data[:self.space_for_name*(index)]
+                    part_three = data[self.space_for_name*(index+1):]
                     part_two = (student.name + (' '*(self.space_for_name - len(student.name)))).encode()
                     data = part_one+part_two+part_three
                     file.seek(0)
@@ -173,14 +175,15 @@ class HashTable:
         bytes = str.encode(key)
         number = int.from_bytes(bytes)
         hash = number % self.size
+        index = hash
         j = 1
-        while self.table[hash] is not None and self.table[hash] != student:
-            hash = (hash + j * j) % self.size
+        while self.table[index] is not None and self.table[index] != student:
+            index = (hash + j * j) % self.size
             j += 1
-        if self.table[hash] is None:
+        if self.table[index] is None:
             return False
         else:
-            self.table[hash] = None
+            self.table[index] = None
             return True
 
 
@@ -257,6 +260,7 @@ def set_bytevalue_file(filename, value, index):
         file.write(data)
         file.close()
         return True
+
 
 def counting_sort_linked(aList, k): #Counting Sort, k is max value
     counter = [0] * (k + 1)
@@ -503,18 +507,34 @@ def do_CSAF(sizes):
         times.append(elapsed)
         print("Time elapsed: ", time.time() - start_time)
     return times
+def do_hash_file(sizes, from_file = False, filename = ""):
+    times = []
+    for size in sizes:
+        hashtable = HashTable(size,from_file,filename)
+        print("FILE Hash table search, size: ", '{:>10}'.format(size))
+        str = ""
+        for i in range(size):
+            str_temp = ''.join(random.choices(string.ascii_uppercase + string.digits, k=12))
+            print(str_temp)
+            hashtable.QuadraticHashInsert(Student(str))
+            if (i == 0):
+                str = str_temp
+        start_time = time.time()
+        print(hashtable.Retrieve(str))
+        elapsed = time.time() - start_time
+        times.append(elapsed)
+        print("Time elapsed: ", time.time() - start_time)
 
-
-def do_all(sizes_l, sizes_b):
+def do_all(sizes_l, sizes_b, sizes_m):
     CSLLF = do_CSLLF(sizes_l)
     CSLL = do_CSLL(sizes_b)
     CSAF = do_CSAF(sizes_l)
     CSA = do_CSA(sizes_b)
     ##Geometric:
     SSLLF = do_SSLLF(sizes_l)
-    SSLL = do_SSLL(sizes_l)
+    SSLL = do_SSLL(sizes_m)
     SSAF = do_SSAF(sizes_l)
-    SSA = do_SSA(sizes_l)
+    SSA = do_SSA(sizes_m)
     # HTB = 0
     # HTBF = 0
 
@@ -572,17 +592,35 @@ def do_all(sizes_l, sizes_b):
     plt.xlabel('Elementų skaičius, n')
     plt.ylabel('Laikas, s')
     plt.subplot(247)
-    plt.plot(sizes_l, SSLL, 'b-o')
+    plt.plot(sizes_m, SSLL, 'b-o')
     plt.title('Selection Sort in Linked List in mem')
     plt.xlabel('Elementų skaičius, n')
     plt.ylabel('Laikas, s')
     plt.subplot(248)
-    plt.plot(sizes_l, SSA, 'b-o')
+    plt.plot(sizes_m, SSA, 'b-o')
     plt.title("Selection Sort in Array in mem")
     #plt.plot( CSLLF, CSLL, CSAF, CSA, SSLLF, SSLL, SSAF, SSA)
     #plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
     plt.show()
 
 sizes_b = [1600, 3200, 6400, 12800, 25600, 51200, 100000, 200000, 300000]
+sizes_m = [100, 200, 400,  500, 1000, 1500, 2000, 4000, 6000, 8000, 12000, 13000, 14000]
 sizes_l = [10, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500]
-do_all(sizes_l, sizes_b)
+#do_all(sizes_l, sizes_b, sizes_m)
+#do_hash_file(sizes_l, False, "Hashey")
+hashtable = HashTable(11)
+print("hashy startin")
+added = []
+added.append(hashtable.QuadraticHashInsert(Student("Matas Minelga")))
+added.append(hashtable.QuadraticHashInsert(Student("Rokas")))
+added.append(hashtable.QuadraticHashInsert(Student("Paulius")))
+added.append(hashtable.QuadraticHashInsert(Student("Matas Minelga")))
+added.append(hashtable.QuadraticHashInsert(Student("Simas")))
+added.append(hashtable.QuadraticHashInsert(Student("NeSimas")))
+added.append(hashtable.QuadraticHashInsert(Student("Kas_Nors")))
+added.append(hashtable.QuadraticHashInsert(Student("kmsknfsd")))
+added.append(hashtable.QuadraticHashInsert(Student("kjbfweewj")))
+added.append(hashtable.QuadraticHashInsert(Student("kjbwejfe")))
+added.append(hashtable.QuadraticHashInsert(Student("kjbwejfde")))
+print(added)
+print(hashtable.Retrieve("Matas Minelga"))
