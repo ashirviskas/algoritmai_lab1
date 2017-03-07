@@ -513,8 +513,7 @@ def do_hash_file(sizes, from_file = False, filename = ""):
             str_temp = ''.join(random.choices(string.ascii_uppercase + string.digits, k=12))
             #print(str_temp)
             hashtable.QuadraticHashInsert(Student(str_temp))
-            if (i == 0):
-                str = str_temp
+            str = str_temp
         start_time = time.time()
         print(hashtable.Retrieve(str))
         elapsed = time.time() - start_time
@@ -558,7 +557,7 @@ def do_all(sizes_l, sizes_b, sizes_m):
 
     plt.xlabel('Elementų skaičius, n')
     plt.ylabel('Laikas, s')
-    plt.subplot(241)
+    plt.subplot(241) # pirmi du skaičiai yra XY, trečias indeksas
     plt.plot(sizes_l, CSLLF, 'b-o')
     plt.title('Counting Sort in Linked List in file')
     plt.xlabel('Elementų skaičius, n')
@@ -600,25 +599,22 @@ def do_all(sizes_l, sizes_b, sizes_m):
     #plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
     plt.show()
 
-sizes_b = [1600, 3200, 6400, 12800, 25600, 51200, 100000, 200000, 300000]
-sizes_m = [100, 200, 400,  500, 1000, 1500, 2000, 4000, 6000, 8000, 12000, 13000, 14000]
-sizes_l = [10, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500]
+sizes_b = [1600, 3200, 6400, 12800, 25600, 51200, 100000, 200000, 300000] # big sizes
+sizes_m = [2000, 4000, 6000, 8000, 12000, 13000, 14000, 30000, 50000, 80000] # medium sizes
+sizes_l = [10, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500] # low sizes
 #do_all(sizes_l, sizes_b, sizes_m)
-times_f = do_hash_file(sizes_l, True, "Hashey")
-print(times_f)
-"""hashtable = HashTable(11, True, "Hashey")
-print("hashy startin")
-added = []
-added.append(hashtable.QuadraticHashInsert(Student("Matas Minelga")))
-added.append(hashtable.QuadraticHashInsert(Student("Rokas")))
-added.append(hashtable.QuadraticHashInsert(Student("Paulius")))
-added.append(hashtable.QuadraticHashInsert(Student("Matas Minelga")))
-added.append(hashtable.QuadraticHashInsert(Student("Simas")))
-added.append(hashtable.QuadraticHashInsert(Student("NeSimas")))
-added.append(hashtable.QuadraticHashInsert(Student("Kas_Nors")))
-added.append(hashtable.QuadraticHashInsert(Student("kmsknfsd")))
-added.append(hashtable.QuadraticHashInsert(Student("kjbfweewj")))
-added.append(hashtable.QuadraticHashInsert(Student("kjbwejfe")))
-added.append(hashtable.QuadraticHashInsert(Student("kjbwejfde")))
-print(added)
-print(hashtable.Retrieve("Matas Minelga"))"""
+#times_f = do_hash_file(sizes_l, True, "Hashey")
+times_nf = do_hash_file(sizes_m, False, "Hashey")
+plt.xlabel('Elementų skaičius, n')
+"""plt.ylabel('Laikas, s')
+plt.subplot(211)
+plt.plot(sizes_l, times_f, 'b-o')
+plt.title('Hash kvadratinės funkcijos paskutinio elemento paieškos faile laikas')
+plt.xlabel('Elementų skaičius, n')
+plt.ylabel('Laikas, s')"""
+plt.subplot(111)
+plt.plot(sizes_m, times_nf, 'b-o')
+plt.title('Hash kvadratinės funkcijos paskutinio elemento paieškos laikas')
+plt.xlabel('Elementų skaičius, n')
+plt.ylabel('Laikas, s')
+plt.show()
