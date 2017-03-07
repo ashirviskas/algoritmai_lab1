@@ -583,6 +583,6 @@ def do_all(sizes_l, sizes_b):
     #plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
     plt.show()
 
-sizes_b = [1600, 3200, 6400, 12800, 25600, 51200, 100000, 200000, 3000000]
+sizes_b = [1600, 3200, 6400, 12800, 25600, 51200, 100000, 200000, 300000]
 sizes_l = [10, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500]
 do_all(sizes_l, sizes_b)
