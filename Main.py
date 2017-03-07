@@ -393,18 +393,20 @@ def populate_array(array, min, max, n):
     for i in range(n):
         array.append(random.randrange(min, max, 1))
 
+def do_CSLLF(sizes):
+    times = []
+    for size in sizes:
+        print("FILE Sorting Linked with counting sort, size: ", '{:>10}'.format(size))
+        populate_binary_file_list("linked_data", 0, 10000, size)
+        start_time = time.time()
+        counting_sort_linked_file("linked_data")
+        elapsed = time.time() - start_time
+        times.append(elapsed)
+        print("Time elapsed: ", time.time() - start_time)
+    return times
 
-def do_all(sizes):
-    CSLLF = []
-    CSLL = []
-    CSAF = []
-    CSA = []
-    SSLLF = []
-    SSLL = []
-    SSAF = []
-    SSA = []
-    HTB = 0
-    HTBF = 0
+def do_CSLL(sizes):
+    times = []
     for size in sizes:
         L = LinkedList()
         populate_list(L, 0, 10000, size)
@@ -413,9 +415,13 @@ def do_all(sizes):
         counting_sort_linked(L, 10000)
         #print("Sorted Linked List:",L)
         elapsed = time.time() - start_time
-        CSLL.append(elapsed)
+        times.append(elapsed)
         print("Time elapsed: ",time.time() - start_time)
         L.clear()
+    return times
+
+def do_CSA(sizes):
+    times = []
     for size in sizes:
         Array = []
         populate_array(Array, 0, 10000, size)
@@ -425,9 +431,14 @@ def do_all(sizes):
         counting_sort_array(Array, 10000)
         #print(Array)
         elapsed = time.time() - start_time
-        CSA.append(elapsed)
+        times.append(elapsed)
         print("Time elapsed: ",time.time() - start_time)
+    return times
 
+
+def do_SSLL(sizes):
+    times = []
+    L = LinkedList()
     for size in sizes:
         populate_list(L, 0, 10000, size)
         print("Sorting Linked List with selection sort, size: ", '{:>10}'.format(size))
@@ -435,10 +446,14 @@ def do_all(sizes):
         selection_sort_linked(L)
         #print("Sorted Linked List:",L)
         elapsed = time.time() - start_time
-        SSLL.append(elapsed)
+        times.append(elapsed)
         print("Time elapsed: ",time.time() - start_time)
         L.clear()
+    return times
 
+
+def do_SSA(sizes):
+    times = []
     for size in sizes:
         Array = []
         populate_array(Array, 0, 10000, size)
@@ -446,41 +461,62 @@ def do_all(sizes):
         start_time = time.time()
         selection_sort_array(Array)
         elapsed = time.time() - start_time
-        SSA.append(elapsed)
+        times.append(elapsed)
         print("Time elapsed: ", time.time() - start_time)
-    #FILES STARTIN #
+    return times
+
+
+def do_SSAF(sizes):
+    times = []
     for size in sizes:
         print("FILE Sorting Array with selection sort, size: ", '{:>10}'.format(size))
         populate_binary_file_array("arr_data", 0, 10000, size)
         start_time = time.time()
         selection_sort_array_file("arr_data")
         elapsed = time.time() - start_time
-        SSAF.append(elapsed)
+        times.append(elapsed)
         print("Time elapsed: ", time.time() - start_time)
+    return times
+
+
+def do_SSLLF(sizes):
+    times = []
     for size in sizes:
         print("FILE Sorting Linked with selection sort, size: ", '{:>10}'.format(size))
         populate_binary_file_list("linked_data", 0, 10000, size)
         start_time = time.time()
         selection_sort_linked_file("linked_data")
         elapsed = time.time() - start_time
-        SSLLF.append(elapsed)
+        times.append(elapsed)
         print("Time elapsed: ", time.time() - start_time)
+    return times
+
+
+def do_CSAF(sizes):
+    times = []
     for size in sizes:
         print("FILE Sorting Array with counting sort, size: ", '{:>10}'.format(size))
         populate_binary_file_array("arr_data", 0, 10000, size)
         start_time = time.time()
         counting_sort_array_file("arr_data")
         elapsed = time.time() - start_time
-        CSAF.append(elapsed)
+        times.append(elapsed)
         print("Time elapsed: ", time.time() - start_time)
-    for size in sizes:
-        print("FILE Sorting Linked with counting sort, size: ", '{:>10}'.format(size))
-        populate_binary_file_list("linked_data", 0, 10000, size)
-        start_time = time.time()
-        counting_sort_linked_file("linked_data")
-        elapsed = time.time() - start_time
-        CSLLF.append(elapsed)
-        print("Time elapsed: ", time.time() - start_time)
+    return times
+
+
+def do_all(sizes_l, sizes_b):
+    CSLLF = do_CSLLF(sizes_l)
+    CSLL = do_CSLL(sizes_b)
+    CSAF = do_CSAF(sizes_l)
+    CSA = do_CSA(sizes_b)
+    ##Geometric:
+    SSLLF = do_SSLLF(sizes_l)
+    SSLL = do_SSLL(sizes_l)
+    SSAF = do_SSAF(sizes_l)
+    SSA = do_SSA(sizes_l)
+    # HTB = 0
+    # HTBF = 0
 
     start_time = time.time()
     hashtable = HashTable(5)
@@ -502,23 +538,51 @@ def do_all(sizes):
     elapsed = time.time() - start_time
     HTBF = elapsed
     #print(hashtable)
-    #plt.subplot(211)
-    plt.xlabel('Elementų skaičius')
-    plt.ylabel('Laikas')
-    plt.plot( sizes, CSLLF, label = "CSLLF")
-    plt.plot( sizes, CSLL, label = "CSLL")
-    plt.plot( sizes, CSAF, label = "CSAF")
-    plt.plot( sizes, CSA, label = "CSA")
-    plt.plot( sizes, SSLLF, label = "SSLLF")
-    plt.plot( sizes, SSLL, label = "SSLL")
-    plt.plot( sizes, SSAF, label = "SSAF")
-    plt.plot( sizes, SSA, label = "SSA")
+
+    plt.xlabel('Elementų skaičius, n')
+    plt.ylabel('Laikas, s')
+    plt.subplot(241)
+    plt.plot(sizes_l, CSLLF, 'k')
+    plt.title('Counting Sort in Linked List in file')
+    plt.xlabel('Elementų skaičius, n')
+    plt.ylabel('Laikas, s')
+    plt.subplot(242)
+    plt.plot(sizes_l, CSAF, 'k')
+    plt.title("Counting Sort in Array in file")
+    plt.xlabel('Elementų skaičius, n')
+    plt.ylabel('Laikas, s')
+    plt.subplot(243)
+    plt.plot(sizes_b, CSLL, 'k')
+    plt.title('Counting Sort in Linked List in mem')
+    plt.xlabel('Elementų skaičius, n')
+    plt.ylabel('Laikas, s')
+    plt.subplot(244)
+    plt.plot(sizes_b, CSA, 'k')
+    plt.title("Counting Sort in Array in mem")
+    plt.xlabel('Elementų skaičius, n')
+    plt.ylabel('Laikas, s')
+    plt.subplot(245)
+    plt.plot(sizes_l, SSLLF, 'k')
+    plt.title('Selection Sort in Linked List in file')
+    plt.xlabel('Elementų skaičius, n')
+    plt.ylabel('Laikas, s')
+    plt.subplot(246)
+    plt.plot(sizes_l, SSAF, 'k')
+    plt.title("Selection Sort in Array in file")
+    plt.xlabel('Elementų skaičius, n')
+    plt.ylabel('Laikas, s')
+    plt.subplot(247)
+    plt.plot(sizes_l, SSLL, 'k')
+    plt.title('Selection Sort in Linked List in mem')
+    plt.xlabel('Elementų skaičius, n')
+    plt.ylabel('Laikas, s')
+    plt.subplot(248)
+    plt.plot(sizes_l, SSA, 'k')
+    plt.title("Selection Sort in Array in mem")
     #plt.plot( CSLLF, CSLL, CSAF, CSA, SSLLF, SSLL, SSAF, SSA)
     #plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-    plt.legend(bbox_to_anchor=(1, 1),
-               bbox_transform=plt.gcf().transFigure)
-
     plt.show()
 
-sizes = [50, 100, 200, 400]
-do_all(sizes)
+sizes_b = [1600, 3200, 6400, 12800, 25600, 51200, 100000, 200000, 3000000]
+sizes_l = [10, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500]
+do_all(sizes_l, sizes_b)
