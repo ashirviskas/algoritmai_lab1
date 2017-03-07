@@ -88,17 +88,29 @@ class HashTable:
 
     def Retrieve(self, key):
         bytes = str.encode(key)
-        number = int.from_bytes(bytes)
+        number = int.from_bytes(bytes, sys.byteorder)
         hash = number % self.size
         j = 1
-        while (self.table[hash] is not None and self.table[hash] != key):
-            hash = (hash + j * j) % self.size
-            j += 1
-        if (self.table[hash] == None):
-            print("no such data")
+        if not self.from_file:
+            while (self.table[hash] is not None and self.table[hash] != key):
+                hash = (hash + j * j) % self.size
+                j += 1
+            if (self.table[hash] == None):
+                print("no such data")
+            else:
+                return self.table[hash]
         else:
-            return self.table[hash]
-
+            with open(self.filename, "r+b", 0) as file:
+                data = file.read()
+                while data[hash * self.space_for_name:hash * self.space_for_name + self.space_for_name] != (
+                    ' ' * self.space_for_name).encode() and data[hash * self.space_for_name:hash * self.space_for_name + self.space_for_name] != (key + (' '*(self.space_for_name - len(key)))).encode():
+                    hash = (hash + j * j) % self.size
+                    j += 1
+                if data[hash * self.space_for_name:hash * self.space_for_name + self.space_for_name] == (
+                    ' ' * self.space_for_name).encode():
+                    print("no such data")
+                else:
+                    return data[hash * self.space_for_name:hash * self.space_for_name + self.space_for_name]
     def checkIfFull(self):
         full = True
         if not self.from_file:
@@ -490,20 +502,23 @@ def do_all(sizes):
     elapsed = time.time() - start_time
     HTBF = elapsed
     #print(hashtable)
-    plt.subplot(211)
-    plt.plot( CSLLF, label = "CSLLF")
-    plt.plot( CSLL, label = "CSLL")
-    plt.plot( CSAF, label = "CSAF")
-    plt.plot( CSA, label = "CSA")
-    plt.plot( SSLLF, label = "SSLLF")
-    plt.plot( SSLL, label = "SSLL")
-    plt.plot( SSAF, label = "SSAF")
-    plt.plot( SSA, label = "SSA")
+    #plt.subplot(211)
+    plt.xlabel('Elementų skaičius')
+    plt.ylabel('Laikas')
+    plt.plot( sizes, CSLLF, label = "CSLLF")
+    plt.plot( sizes, CSLL, label = "CSLL")
+    plt.plot( sizes, CSAF, label = "CSAF")
+    plt.plot( sizes, CSA, label = "CSA")
+    plt.plot( sizes, SSLLF, label = "SSLLF")
+    plt.plot( sizes, SSLL, label = "SSLL")
+    plt.plot( sizes, SSAF, label = "SSAF")
+    plt.plot( sizes, SSA, label = "SSA")
     #plt.plot( CSLLF, CSLL, CSAF, CSA, SSLLF, SSLL, SSAF, SSA)
-    #plt.axis(sizes)
-    plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+    #plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+    plt.legend(bbox_to_anchor=(1, 1),
+               bbox_transform=plt.gcf().transFigure)
 
     plt.show()
 
-sizes = [10, 100, 200]
+sizes = [50, 100, 200, 400]
 do_all(sizes)
